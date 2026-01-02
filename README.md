@@ -113,7 +113,6 @@ face-mask-detection/
 │   └── mobilenetv2_mask_detector.h5  # Pre-trained model
 │
 ├── requirements.txt      # Python dependencies
-├── run_app.bat           # Batch file to run the app
 ├── train_model.py        # Script to train the model
 ├── README.md             # This file
 └── LICENSE

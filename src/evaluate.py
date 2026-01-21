@@ -4,6 +4,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import logging
 import os
+import json
+import csv
 
 
 def setup_logging(logger_name="Evaluator"):
@@ -230,4 +232,161 @@ def plot_history(history, fine_history=None):
         
     except Exception as e:
         logger.error(f"Error plotting history: {str(e)}", exc_info=True)
+        raise
+
+
+def save_metrics(test_loss, test_acc, y_true, y_pred, metrics_file='metrics.json'):
+    """
+    Saves evaluation metrics to a JSON file for DVC tracking.
+
+    Args:
+        test_loss (float): Test loss value.
+        test_acc (float): Test accuracy value.
+        y_true (list): True labels.
+        y_pred (list): Predicted labels.
+        metrics_file (str): Path to save metrics JSON file. Default is 'metrics.json'.
+        
+    Raises:
+        Exception: If saving metrics fails.
+    """
+    try:
+        logger.info(f"Saving metrics to {metrics_file}")
+        
+        # Create metrics directory if it doesn't exist
+        metrics_dir = os.path.dirname(metrics_file) if os.path.dirname(metrics_file) else '.'
+        os.makedirs(metrics_dir, exist_ok=True)
+        
+        # Calculate additional metrics
+        cm = confusion_matrix(y_true, y_pred)
+        class_report = classification_report(y_true, y_pred, target_names=["WithMask", "WithoutMask"], output_dict=True)
+        
+        # True Negatives, False Positives, False Negatives, True Positives
+        tn, fp, fn, tp = cm.ravel()
+        
+        metrics_data = {
+            "test_loss": float(test_loss),
+            "test_accuracy": float(test_acc),
+            "total_samples": len(y_true),
+            "confusion_matrix": {
+                "true_negatives": int(tn),
+                "false_positives": int(fp),
+                "false_negatives": int(fn),
+                "true_positives": int(tp)
+            },
+            "precision": float(class_report["weighted avg"]["precision"]),
+            "recall": float(class_report["weighted avg"]["recall"]),
+            "f1_score": float(class_report["weighted avg"]["f1-score"]),
+            "class_metrics": {
+                "WithMask": {
+                    "precision": float(class_report["WithMask"]["precision"]),
+                    "recall": float(class_report["WithMask"]["recall"]),
+                    "f1_score": float(class_report["WithMask"]["f1-score"]),
+                    "support": int(class_report["WithMask"]["support"])
+                },
+                "WithoutMask": {
+                    "precision": float(class_report["WithoutMask"]["precision"]),
+                    "recall": float(class_report["WithoutMask"]["recall"]),
+                    "f1_score": float(class_report["WithoutMask"]["f1-score"]),
+                    "support": int(class_report["WithoutMask"]["support"])
+                }
+            }
+        }
+        
+        # Save to JSON file
+        with open(metrics_file, 'w') as f:
+            json.dump(metrics_data, f, indent=4)
+        
+        logger.info(f"Metrics saved successfully to {metrics_file}")
+        logger.debug(f"Metrics content: {json.dumps(metrics_data, indent=2)}")
+        
+        return metrics_data
+        
+    except Exception as e:
+        logger.error(f"Error saving metrics: {str(e)}", exc_info=True)
+        raise
+
+
+def save_confusion_matrix_csv(y_true, y_pred, csv_file='plots/confusion_matrix.csv'):
+    """
+    Saves confusion matrix data to CSV for DVC plots.
+
+    Args:
+        y_true (list): True labels.
+        y_pred (list): Predicted labels.
+        csv_file (str): Path to save confusion matrix CSV file. Default is 'plots/confusion_matrix.csv'.
+        
+    Raises:
+        Exception: If saving CSV fails.
+    """
+    try:
+        logger.info(f"Saving confusion matrix CSV to {csv_file}")
+        
+        # Create plots directory if it doesn't exist
+        csv_dir = os.path.dirname(csv_file) if os.path.dirname(csv_file) else '.'
+        os.makedirs(csv_dir, exist_ok=True)
+        
+        # Generate confusion matrix
+        cm = confusion_matrix(y_true, y_pred)
+        
+        # Write to CSV
+        with open(csv_file, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['actual', 'predicted', 'count'])
+            for i in range(len(cm)):
+                for j in range(len(cm[i])):
+                    writer.writerow([i, j, cm[i][j]])
+        
+        logger.info(f"Confusion matrix CSV saved successfully to {csv_file}")
+        
+    except Exception as e:
+        logger.error(f"Error saving confusion matrix CSV: {str(e)}", exc_info=True)
+        raise
+
+
+def save_training_history(history, fine_history=None, history_file='plots/training_history.json'):
+    """
+    Saves training and fine-tuning history to JSON file.
+
+    Args:
+        history (tf.keras.callbacks.History): Training history.
+        fine_history (tf.keras.callbacks.History, optional): Fine-tuning history.
+        history_file (str): Path to save history JSON file. Default is 'plots/training_history.json'.
+        
+    Raises:
+        Exception: If saving history fails.
+    """
+    try:
+        logger.info(f"Saving training history to {history_file}")
+        
+        # Create plots directory if it doesn't exist
+        history_dir = os.path.dirname(history_file) if os.path.dirname(history_file) else '.'
+        os.makedirs(history_dir, exist_ok=True)
+        
+        history_data = {
+            "initial_training": {
+                "accuracy": [float(x) for x in history.history['accuracy']],
+                "val_accuracy": [float(x) for x in history.history['val_accuracy']],
+                "loss": [float(x) for x in history.history['loss']],
+                "val_loss": [float(x) for x in history.history['val_loss']]
+            }
+        }
+        
+        if fine_history:
+            history_data["finetuning"] = {
+                "accuracy": [float(x) for x in fine_history.history['accuracy']],
+                "val_accuracy": [float(x) for x in fine_history.history['val_accuracy']],
+                "loss": [float(x) for x in fine_history.history['loss']],
+                "val_loss": [float(x) for x in fine_history.history['val_loss']]
+            }
+            logger.debug(f"Saved initial training and fine-tuning history")
+        else:
+            logger.debug(f"Saved initial training history only")
+        
+        with open(history_file, 'w') as f:
+            json.dump(history_data, f, indent=4)
+        
+        logger.info(f"Training history saved successfully to {history_file}")
+        
+    except Exception as e:
+        logger.error(f"Error saving training history: {str(e)}", exc_info=True)
         raise

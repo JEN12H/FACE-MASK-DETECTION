@@ -162,8 +162,8 @@ cython_debug/
 .dvc/plots/
 .dvc/experiments/
 
-# DVC lock file (tracks dependencies)
-dvc.lock
+# Keep DVC lock file (DO NOT ignore - needed for reproducibility)
+# dvc.lock should be committed to git
 
 # ============================================
 # Machine Learning / Data Science

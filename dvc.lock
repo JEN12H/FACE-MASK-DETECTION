@@ -1,0 +1,101 @@
+schema: '2.0'
+stages:
+  prepare_data:
+    cmd: python train_model.py
+    deps:
+    - path: params.yaml
+      hash: md5
+      md5: 01089e4b0282913e47baf5da4f616d06
+      size: 1378
+    - path: src/data_loader.py
+      hash: md5
+      md5: 2f8ee49eec322b36d99954b86e20aa6c
+      size: 6579
+    - path: src/evaluate.py
+      hash: md5
+      md5: d470daeb60d445f2c30586e49ba50de7
+      size: 13945
+    - path: src/model.py
+      hash: md5
+      md5: e3ef6ee8bb995bc1f70919be7cfbd2b2
+      size: 4850
+    - path: src/predict.py
+      hash: md5
+      md5: e5c912dd1150d6efa7c8341bdf2d4cbf
+      size: 3346
+    - path: src/train.py
+      hash: md5
+      md5: b95633e6310395a02096448cb865fb1d
+      size: 3865
+    - path: train_model.py
+      hash: md5
+      md5: 360600e450832df765b2685dc12f2155
+      size: 5276
+    params:
+      params.yaml:
+        data:
+          train_dir: data/Face Mask Dataset/Face Mask Dataset/Train
+          test_dir: data/Face Mask Dataset/Face Mask Dataset/Test
+          val_dir: data/Face Mask Dataset/Face Mask Dataset/Validation
+          zip_path:
+          img_size:
+          - 224
+          - 224
+          batch_size: 32
+        finetune:
+          base_model_trainable: true
+          freeze_layers: 30
+          learning_rate: 1e-05
+        model:
+          architecture: MobileNetV2
+          input_shape:
+          - 224
+          - 224
+          - 3
+          base_model_weights: imagenet
+          output_type: binary
+          layers:
+          - type: GlobalAveragePooling2D
+          - type: Dense
+            units: 128
+            activation: relu
+          - type: Dropout
+            rate: 0.5
+          - type: Dense
+            units: 1
+            activation: sigmoid
+        output:
+          model_path: models/mobilenetv2_mask_detector.h5
+          model_format: h5
+        prediction:
+          confidence_threshold: 0.5
+          mask_class: 1
+          no_mask_class: 0
+        training:
+          epochs_initial: 5
+          epochs_finetune: 0
+          batch_size: 32
+          optimizer:
+            type: Adam
+            learning_rate_initial: 0.001
+            learning_rate_finetune: 1e-05
+          loss: binary_crossentropy
+          metrics:
+          - accuracy
+    outs:
+    - path: metrics.json
+      hash: md5
+      md5: 1d617837ce0c5f29f2c3c0f1f84852db
+      size: 141
+    - path: models/mobilenetv2_mask_detector.h5
+      hash: md5
+      md5: 223c8b79f5920ea7141f5868fc21f1ca
+      size: 23781688
+    - path: plots/confusion_matrix.csv
+      hash: md5
+      md5: 52b5a769f3dcea0621fffa244796c32c
+      size: 56
+    - path: plots/training_history.json
+      hash: md5
+      md5: 0e7ce73b39f34237ecb2a84aeb9ad660
+      size: 1692

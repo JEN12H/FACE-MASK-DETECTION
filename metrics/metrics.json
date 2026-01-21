@@ -1,0 +1,6 @@
+{
+    "test_loss": 0.013684013858437538,
+    "test_accuracy": 0.9979838728904724,
+    "training_epochs": 5,
+    "finetuning_epochs": 5
+}

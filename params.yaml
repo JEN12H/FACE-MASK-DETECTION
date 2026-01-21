@@ -2,10 +2,10 @@
 
 # Data Configuration
 data:
-  train_dir: "data/Face Mask Dataset/Train"
-  test_dir: "data/Face Mask Dataset/Test"
-  val_dir: "data/Face Mask Dataset/Validation"
-  zip_path: "data/archive (5).zip"
+  train_dir: "data/Face Mask Dataset/Face Mask Dataset/Train"
+  test_dir: "data/Face Mask Dataset/Face Mask Dataset/Test"
+  val_dir: "data/Face Mask Dataset/Face Mask Dataset/Validation"
+  zip_path: null
   img_size: [224, 224]
   batch_size: 32
 
@@ -29,7 +29,7 @@ model:
 # Training Configuration
 training:
   epochs_initial: 5
-  epochs_finetune: 5
+  epochs_finetune: 0
   batch_size: 32
   optimizer:
     type: "Adam"

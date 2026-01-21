@@ -37,10 +37,10 @@ logger.info("Starting Face Mask Detection Pipeline")
 # Load data
 logger.info("Loading datasets...")
 train_data, test_data, val_data = load_datasets(
-    params['data']['train_dir'], 
-    params['data']['test_dir'], 
-    params['data']['val_dir'], 
-    zip_path=params['data']['zip_path']
+    'data/Face Mask Dataset/Face Mask Dataset/Train', 
+    'data/Face Mask Dataset/Face Mask Dataset/Test', 
+    'data/Face Mask Dataset/Face Mask Dataset/Validation', 
+    zip_path=None
 )
 
 logger.info(f"Class names: {train_data.class_names}")
@@ -66,11 +66,15 @@ model.summary()
 logger.info(f"Training model for {params['training']['epochs_initial']} epochs...")
 history = train_model(model, train_ds, val_ds, epochs=params['training']['epochs_initial'])
 
-# Fine-tune
-logger.info("Fine-tuning model...")
-model = fine_tune_model(model, base_model)
-logger.info(f"Fine-tuning for {params['training']['epochs_finetune']} epochs...")
-fine_history = train_model(model, train_ds, val_ds, epochs=params['training']['epochs_finetune'])
+# Fine-tune (skip if epochs_finetune is 0)
+fine_history = None
+if params['training']['epochs_finetune'] > 0:
+    logger.info("Fine-tuning model...")
+    model = fine_tune_model(model, base_model)
+    logger.info(f"Fine-tuning for {params['training']['epochs_finetune']} epochs...")
+    fine_history = train_model(model, train_ds, val_ds, epochs=params['training']['epochs_finetune'])
+else:
+    logger.info("Skipping fine-tuning (epochs_finetune=0)")
 
 # Evaluate
 logger.info("Evaluating model on test data...")

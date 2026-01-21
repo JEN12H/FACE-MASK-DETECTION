@@ -1,0 +1,68 @@
+stages:
+  # Stage 1: Data Loading and Preprocessing
+  prepare_data:
+    cmd: python train_model.py
+    deps:
+      - data/archive (5).zip
+      - src/data_loader.py
+      - src/model.py
+      - src/train.py
+      - src/evaluate.py
+      - train_model.py
+    params:
+      - data
+      - model
+      - training
+      - finetune
+    outs:
+      - models/mobilenetv2_mask_detector.h5:
+          cache: true
+    metrics:
+      - metrics.json:
+          cache: false
+    plots:
+      - plots/confusion_matrix.csv:
+          template: confusion
+          x: actual
+          y: predicted
+      - plots/training_history.json:
+          x: epoch
+          y:
+            plots/training_history.json: [accuracy, val_accuracy, loss, val_loss]
+    logs:
+      - logs/data_loader.log
+      - logs/model.log
+      - logs/train.log
+      - logs/evaluate.log
+
+  # Stage 2: Model Evaluation (Optional - if separated)
+  evaluate:
+    cmd: python -c "import sys; sys.path.append('src'); from evaluate import evaluate_model, plot_confusion_matrix, plot_history, get_predictions; from train_model import model, test_ds; evaluate_model(model, test_ds); y_true, y_pred = get_predictions(model, test_ds); plot_confusion_matrix(y_true, y_pred)"
+    deps:
+      - models/mobilenetv2_mask_detector.h5
+      - src/evaluate.py
+    metrics:
+      - metrics.json:
+          cache: false
+    plots:
+      - plots/confusion_matrix.csv:
+          template: confusion
+          x: actual
+          y: predicted
+    logs:
+      - logs/evaluate.log
+
+# Metrics and plots configuration
+metrics:
+  - metrics.json:
+      cache: false
+
+plots:
+  - plots/confusion_matrix.csv:
+      template: confusion
+      x: actual
+      y: predicted
+  - plots/training_history.json:
+      x: epoch
+      y:
+        plots/training_history.json: [accuracy, val_accuracy, loss, val_loss]

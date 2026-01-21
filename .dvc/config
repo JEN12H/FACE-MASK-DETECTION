@@ -1,0 +1,38 @@
+# DVC configuration file for Face Mask Detection project
+# This file contains DVC settings for remote storage, caching, and pipeline configuration
+
+[core]
+    autostage = true
+    analytics = true
+    check_update = true
+    remote = myremote
+
+['remote "myremote"']
+    url = /tmp/dvc-storage
+    # For AWS S3:
+    # url = s3://your-bucket-name/dvc-storage
+    # For Google Drive:
+    # url = gdrive://your-folder-id
+    # For Azure Blob Storage:
+    # url = azure://your-container/dvc-storage
+
+[cache]
+    dir = .dvc/cache
+    type = copy
+
+[metrics]
+    metrics.json:
+        cache: false
+
+[plots]
+    plots/confusion_matrix.csv:
+        template: confusion
+        x: actual
+        y: predicted
+    plots/training_history.json:
+        x: epoch
+        y:
+          - accuracy
+          - val_accuracy
+          - loss
+          - val_loss

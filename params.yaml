@@ -1,0 +1,63 @@
+# Face Mask Detection Project Parameters
+
+# Data Configuration
+data:
+  train_dir: "data/Face Mask Dataset/Train"
+  test_dir: "data/Face Mask Dataset/Test"
+  val_dir: "data/Face Mask Dataset/Validation"
+  zip_path: "data/archive (5).zip"
+  img_size: [224, 224]
+  batch_size: 32
+
+# Model Configuration
+model:
+  architecture: "MobileNetV2"
+  input_shape: [224, 224, 3]
+  base_model_weights: "imagenet"
+  output_type: "binary"
+  layers:
+    - type: "GlobalAveragePooling2D"
+    - type: "Dense"
+      units: 128
+      activation: "relu"
+    - type: "Dropout"
+      rate: 0.5
+    - type: "Dense"
+      units: 1
+      activation: "sigmoid"
+
+# Training Configuration
+training:
+  epochs_initial: 5
+  epochs_finetune: 5
+  batch_size: 32
+  optimizer:
+    type: "Adam"
+    learning_rate_initial: 0.001
+    learning_rate_finetune: 0.00001
+  loss: "binary_crossentropy"
+  metrics:
+    - "accuracy"
+
+# Fine-tuning Configuration
+finetune:
+  base_model_trainable: true
+  freeze_layers: 30
+  learning_rate: 0.00001
+
+# Model Output
+output:
+  model_path: "models/mobilenetv2_mask_detector.h5"
+  model_format: "h5"
+
+# Logging
+logging:
+  logs_dir: "logs"
+  log_file: "logs/data_loader.log"
+  log_level: "DEBUG"
+
+# Predictions
+prediction:
+  confidence_threshold: 0.5
+  mask_class: 1
+  no_mask_class: 0

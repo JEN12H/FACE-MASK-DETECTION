@@ -1,0 +1,34 @@
+# DVC ignore file - excludes files and directories from DVC tracking
+
+# Directories to ignore
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# System files
+.gitignore
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Keep important files
+!logs/.gitkeep
+!models/.gitkeep
+!data/.gitkeep

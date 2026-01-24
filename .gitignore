@@ -7,8 +7,10 @@ __pycache__/
 *.so
 
 logs/
+PYTORCH/logs/
 data/
 models/
+PYTORCH/models/
 notebooks/
 
 
@@ -187,6 +189,16 @@ cython_debug/
 data/archive*.zip
 data/Face\ Mask\ Dataset/
 
+# TensorFlow / Keras
+metrics/
+plots/
+*.keras
+
+# PyTorch / MLflow
+PYTORCH/metrics/
+PYTORCH/mlruns/
+PYTORCH/.mlflow/
+
 # Predictions and outputs
 predictions/
 output/
@@ -213,3 +225,6 @@ Thumbs.db
 !data/.gitkeep
 !logs/.gitkeep
 !plots/.gitkeep
+!PYTORCH/models/.gitkeep
+!PYTORCH/logs/.gitkeep
+!PYTORCH/metrics/.gitkeep
